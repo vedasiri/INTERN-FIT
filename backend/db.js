@@ -5,15 +5,16 @@ const config = {
   connectionString: `Driver={ODBC Driver 18 for SQL Server};Server=${process.env.DB_SERVER};Database=${process.env.DB_DATABASE};Trusted_Connection=Yes;TrustServerCertificate=Yes;`,
 };
 
-const connectDB = async () => {
-  try {
-    await sql.connect(config);
+const poolPromise = sql.connect(config)
+  .then((pool) => {
     console.log("MSSQL Database Connected Successfully");
-  } catch (err) {
+    return pool;
+  })
+  .catch((err) => {
     console.log("MSSQL Database Connection Failed:", err.message);
-  }
+  });
+
+module.exports = {
+  sql,
+  poolPromise,
 };
-
-connectDB();
-
-module.exports = sql;
