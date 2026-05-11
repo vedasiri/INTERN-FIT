@@ -10,6 +10,7 @@ const verificationRoutes = require("./routes/verificationRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const matchRoutes = require("./routes/matchRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/match", matchRoutes);
 app.use("/api/reviews", reviewRoutes);
-
+app.use("/api/applications", applicationRoutes);
 
 app.get("/", (req, res) => {
   res.send("INTERN FIT Backend is running");

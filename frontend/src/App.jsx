@@ -6,6 +6,7 @@ import StudentLogin from "./pages/StudentLogin";
 import AlumniRegister from "./pages/AlumniRegister";
 import AlumniLogin from "./pages/AlumniLogin";
 import Dashboard from "./pages/Dashboard";
+import ApplyInternship from "./pages/ApplyInternship";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           path="/dashboard"
           element={<Dashboard />}
         />
+        <Route path="/apply/:internshipId" element={<ApplyInternship />} />
 
       </Routes>
     </BrowserRouter>
