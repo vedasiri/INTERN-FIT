@@ -2,7 +2,6 @@
 const { sql, poolPromise } = require("../db");
 
 const calculateScore = (data) => {
-
   let score = 0;
   let penalty = 0;
 
@@ -43,14 +42,10 @@ const calculateScore = (data) => {
     "pay",
     "100% placement",
     "confirm seat",
-    "security deposit"
+    "security deposit",
   ];
 
-  if (
-    scamWords.some((word) =>
-      desc.includes(word)
-    )
-  ) {
+  if (scamWords.some((word) => desc.includes(word))) {
     penalty = 15;
     score -= 15;
   }
@@ -67,16 +62,11 @@ const calculateScore = (data) => {
   }
 
   return { score, status, penalty };
-
 };
 
-
 // VERIFY EXTERNAL INTERNSHIP
-
 exports.verifyExternalInternship = async (req, res) => {
-
   try {
-
     const {
       student_id,
       internship_url,
@@ -97,20 +87,18 @@ exports.verifyExternalInternship = async (req, res) => {
 
     const pool = await poolPromise;
 
-    await pool.request()
-
+    await pool
+      .request()
       .input("student_id", sql.Int, student_id)
       .input("internship_url", sql.VarChar, internship_url)
       .input("company_email", sql.VarChar, company_email)
       .input("website_url", sql.VarChar, website_url)
       .input("linkedin_url", sql.VarChar, linkedin_url)
-      .input("description", sql.Text, description)
-
+      .input("description", sql.VarChar(sql.MAX), description)
       .input("final_score", sql.Int, result.score)
       .input("verification_status", sql.VarChar, result.status)
       .input("scam_keyword_penalty", sql.Int, result.penalty)
-      .input("result_message", sql.Text, message)
-
+      .input("result_message", sql.VarChar(sql.MAX), message)
       .query(`
         INSERT INTO external_verifications
         (
@@ -125,7 +113,6 @@ exports.verifyExternalInternship = async (req, res) => {
           scam_keyword_penalty,
           result_message
         )
-
         VALUES
         (
           @student_id,
@@ -146,33 +133,24 @@ exports.verifyExternalInternship = async (req, res) => {
       final_score: result.score,
       verification_status: result.status,
     });
-
   } catch (error) {
-
     res.status(500).json({
       message: "Verification failed",
       error: error.message,
     });
-
   }
-
 };
 
-
 // GET VERIFICATION HISTORY
-
 exports.getExternalVerifications = async (req, res) => {
-
   try {
-
     const { student_id } = req.params;
 
     const pool = await poolPromise;
 
-    const result = await pool.request()
-
+    const result = await pool
+      .request()
       .input("student_id", sql.Int, student_id)
-
       .query(`
         SELECT *
         FROM external_verifications
@@ -181,14 +159,10 @@ exports.getExternalVerifications = async (req, res) => {
       `);
 
     res.status(200).json(result.recordset);
-
   } catch (error) {
-
     res.status(500).json({
       message: "Failed to fetch history",
       error: error.message,
     });
-
   }
-
 };

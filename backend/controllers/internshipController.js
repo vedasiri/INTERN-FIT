@@ -1,7 +1,6 @@
 const { sql, poolPromise } = require("../db");
 
 const calculateVerification = (data) => {
-
   let score = 0;
 
   const scamKeywords = [
@@ -12,13 +11,11 @@ const calculateVerification = (data) => {
     "confirm seat",
   ];
 
-  const description =
-    (data.description || "").toLowerCase();
+  const description = (data.description || "").toLowerCase();
 
-  const hasScamKeyword =
-    scamKeywords.some((word) =>
-      description.includes(word)
-    );
+  const hasScamKeyword = scamKeywords.some((word) =>
+    description.includes(word)
+  );
 
   if (
     data.company_email &&
@@ -61,12 +58,9 @@ const calculateVerification = (data) => {
   return { score, status };
 };
 
-
 // ADD INTERNSHIP
 exports.addInternship = async (req, res) => {
-
   try {
-
     const {
       company_name,
       role,
@@ -81,18 +75,17 @@ exports.addInternship = async (req, res) => {
       mode,
     } = req.body;
 
-    const verification =
-      calculateVerification(req.body);
+    const verification = calculateVerification(req.body);
 
     const pool = await poolPromise;
 
-    await pool.request()
-
+    await pool
+      .request()
       .input("company_name", sql.VarChar, company_name)
       .input("role", sql.VarChar, role)
       .input("duration", sql.VarChar, duration)
-      .input("required_skills", sql.Text, required_skills)
-      .input("description", sql.Text, description)
+      .input("required_skills", sql.VarChar(sql.MAX), required_skills)
+      .input("description", sql.VarChar(sql.MAX), description)
       .input("company_email", sql.VarChar, company_email)
       .input("website_url", sql.VarChar, website_url)
       .input("linkedin_url", sql.VarChar, linkedin_url)
@@ -101,7 +94,6 @@ exports.addInternship = async (req, res) => {
       .input("mode", sql.VarChar, mode)
       .input("verification_score", sql.Int, verification.score)
       .input("verification_status", sql.VarChar, verification.status)
-
       .query(`
         INSERT INTO internships
         (
@@ -142,24 +134,17 @@ exports.addInternship = async (req, res) => {
       verification_score: verification.score,
       verification_status: verification.status,
     });
-
   } catch (error) {
-
     res.status(500).json({
       message: "Failed to add internship",
       error: error.message,
     });
-
   }
-
 };
-
 
 // GET ALL INTERNSHIPS
 exports.getAllInternships = async (req, res) => {
-
   try {
-
     const pool = await poolPromise;
 
     const result = await pool.request().query(`
@@ -168,24 +153,17 @@ exports.getAllInternships = async (req, res) => {
     `);
 
     res.status(200).json(result.recordset);
-
   } catch (error) {
-
     res.status(500).json({
       message: "Failed to fetch internships",
       error: error.message,
     });
-
   }
-
 };
-
 
 // GET VERIFIED INTERNSHIPS
 exports.getVerifiedInternships = async (req, res) => {
-
   try {
-
     const pool = await poolPromise;
 
     const result = await pool.request().query(`
@@ -195,14 +173,10 @@ exports.getVerifiedInternships = async (req, res) => {
     `);
 
     res.status(200).json(result.recordset);
-
   } catch (error) {
-
     res.status(500).json({
       message: "Failed to fetch verified internships",
       error: error.message,
     });
-
   }
-
 };

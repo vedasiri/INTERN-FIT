@@ -27,9 +27,15 @@ function StudentRegister() {
       await axios.post("http://localhost:5000/api/auth/student/register", form);
       alert("Student registered successfully");
       navigate("/student-login");
-    } catch (error) {
-      alert(error.response?.data?.message || "Registration failed");
-    }
+   } catch (error) {
+  console.log(error.response?.data);
+
+  alert(
+    error.response?.data?.error ||
+    error.response?.data?.message ||
+    "Registration failed"
+  );
+}
   };
 
   return (

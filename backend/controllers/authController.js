@@ -19,16 +19,16 @@ exports.registerStudent = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const pool = await poolPromise;
 
-    const result = await pool
+    await pool
       .request()
       .input("name", sql.VarChar, name)
       .input("email", sql.VarChar, email)
       .input("password", sql.VarChar, hashedPassword)
       .input("year_of_study", sql.VarChar, year_of_study)
       .input("branch", sql.VarChar, branch)
-      .input("skills", sql.Text, skills)
-      .input("projects", sql.Text, projects)
-      .input("interests", sql.Text, interests)
+      .input("skills", sql.VarChar(sql.MAX), skills)
+      .input("projects", sql.VarChar(sql.MAX), projects)
+      .input("interests", sql.VarChar(sql.MAX), interests)
       .query(`
         INSERT INTO students
         (name, email, password, year_of_study, branch, skills, projects, interests)

@@ -1,11 +1,8 @@
 const { sql, poolPromise } = require("../db");
 
 // ADD REVIEW
-
 exports.addReview = async (req, res) => {
-
   try {
-
     const {
       alumni_id,
       internship_id,
@@ -19,8 +16,8 @@ exports.addReview = async (req, res) => {
 
     const pool = await poolPromise;
 
-    await pool.request()
-
+    await pool
+      .request()
       .input("alumni_id", sql.Int, alumni_id)
       .input("internship_id", sql.Int, internship_id)
       .input("rating", sql.Int, rating)
@@ -30,7 +27,7 @@ exports.addReview = async (req, res) => {
       .input("certificate_value", sql.VarChar, certificate_value)
       .input("stipend_reality", sql.VarChar, stipend_reality)
 
-      .input("comments", sql.Text, comments)
+      .input("comments", sql.VarChar(sql.MAX), comments)
 
       .query(`
         INSERT INTO reviews
@@ -61,31 +58,23 @@ exports.addReview = async (req, res) => {
     res.status(201).json({
       message: "Review added successfully",
     });
-
   } catch (error) {
-
     res.status(500).json({
       message: "Failed to add review",
       error: error.message,
     });
-
   }
-
 };
 
-
 // GET REVIEWS BY INTERNSHIP
-
 exports.getReviewsByInternship = async (req, res) => {
-
   try {
-
     const { internship_id } = req.params;
 
     const pool = await poolPromise;
 
-    const result = await pool.request()
-
+    const result = await pool
+      .request()
       .input("internship_id", sql.Int, internship_id)
 
       .query(`
@@ -104,14 +93,10 @@ exports.getReviewsByInternship = async (req, res) => {
       `);
 
     res.status(200).json(result.recordset);
-
   } catch (error) {
-
     res.status(500).json({
       message: "Failed to fetch reviews",
       error: error.message,
     });
-
   }
-
 };
