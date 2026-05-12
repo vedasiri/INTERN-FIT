@@ -7,6 +7,7 @@ import AlumniRegister from "./pages/AlumniRegister";
 import AlumniLogin from "./pages/AlumniLogin";
 import Dashboard from "./pages/Dashboard";
 import ApplyInternship from "./pages/ApplyInternship";
+import AlumniDashboard from "./pages/AlumniDashboard";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           element={<Dashboard />}
         />
         <Route path="/apply/:internshipId" element={<ApplyInternship />} />
+        <Route path="/alumni-dashboard" element={<AlumniDashboard />} />
 
       </Routes>
     </BrowserRouter>
