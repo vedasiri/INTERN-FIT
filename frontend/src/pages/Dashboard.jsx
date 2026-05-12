@@ -3,6 +3,7 @@ import { getAllInternships } from "../services/internshipService";
 import { calculateMatch } from "../services/matchService";
 import { verifyExternalInternship } from "../services/verificationService";
 import { uploadResumeService } from "../services/profileService";
+import { getReviewsByInternship } from "../services/reviewService";
 
 import StatCard from "../components/StatCard";
 import MatchResult from "../components/MatchResult";
@@ -15,6 +16,9 @@ function Dashboard() {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [search, setSearch] = useState("");
 
+  const [reviews, setReviews] = useState([]);
+  const [showReviews, setShowReviews] = useState(false);
+
   const [urlData, setUrlData] = useState({
     internship_url: "",
     company_email: "",
@@ -24,7 +28,6 @@ function Dashboard() {
   });
 
   let student = {};
-
   try {
     student = JSON.parse(localStorage.getItem("student")) || {};
   } catch {
@@ -96,12 +99,25 @@ function Dashboard() {
     }
   };
 
+  const handleReviews = async (internshipId) => {
+    try {
+      const res = await getReviewsByInternship(internshipId);
+      console.log("Reviews from backend:", res.data);
+
+      setReviews(Array.isArray(res.data) ? res.data : []);
+      setShowReviews(true);
+    } catch (error) {
+      console.log(error.response?.data);
+      alert("Failed to load alumni reviews");
+    }
+  };
+
   const verifyExternal = async () => {
     try {
       const res = await verifyExternalInternship({
-  student_id: student?.student_id || 1,
-  ...urlData,
-});
+        student_id: student?.student_id || 1,
+        ...urlData,
+      });
 
       alert(
         `Status: ${res.data.verification_status}\nScore: ${
@@ -276,6 +292,7 @@ function Dashboard() {
               key={intern.internship_id}
               internship={intern}
               onMatch={checkMatch}
+              onReviews={handleReviews}
             />
           ))}
         </div>
@@ -286,6 +303,69 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {showReviews && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Alumni Reviews
+              </h2>
+
+              <button
+                onClick={() => setShowReviews(false)}
+                className="bg-red-500 text-white px-4 py-2 rounded-xl"
+              >
+                Close
+              </button>
+            </div>
+
+            {reviews.length === 0 ? (
+              <p className="text-gray-600">
+                No alumni reviews available for this internship yet.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div
+                    key={review.review_id}
+                    className="border rounded-xl p-4 bg-slate-50"
+                  >
+                    <p>
+                      <b>Genuine Status:</b>{" "}
+                      {review.is_genuine ||
+                        review.genuine_status ||
+                        "Not shared"}
+                    </p>
+
+                    <p className="mt-2">
+                      <b>Review:</b>{" "}
+                      {review.review_text ||
+                        review.review ||
+                        review.comment ||
+                        "Not shared"}
+                    </p>
+
+                    <p className="mt-2">
+                      <b>Interview Questions:</b>{" "}
+                      {review.interview_questions ||
+                        review.questions ||
+                        "Not shared"}
+                    </p>
+
+                    <p className="mt-2">
+                      <b>Preparation Tips:</b>{" "}
+                      {review.preparation_tips ||
+                        review.tips ||
+                        "Not shared"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

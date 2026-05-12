@@ -1,17 +1,16 @@
 const { sql, poolPromise } = require("../db");
 
-// ADD REVIEW
 exports.addReview = async (req, res) => {
   try {
     const {
       alumni_id,
       internship_id,
-      rating,
-      learning_quality,
-      work_pressure,
-      certificate_value,
-      stipend_reality,
-      comments,
+      company_name,
+      role,
+      review_text,
+      interview_questions,
+      preparation_tips,
+      is_genuine,
     } = req.body;
 
     const pool = await poolPromise;
@@ -20,38 +19,42 @@ exports.addReview = async (req, res) => {
       .request()
       .input("alumni_id", sql.Int, alumni_id)
       .input("internship_id", sql.Int, internship_id)
-      .input("rating", sql.Int, rating)
-
-      .input("learning_quality", sql.VarChar, learning_quality)
-      .input("work_pressure", sql.VarChar, work_pressure)
-      .input("certificate_value", sql.VarChar, certificate_value)
-      .input("stipend_reality", sql.VarChar, stipend_reality)
-
-      .input("comments", sql.VarChar(sql.MAX), comments)
-
+      .input("company_name", sql.VarChar(100), company_name)
+      .input("role", sql.VarChar(100), role)
+      .input("review_text", sql.VarChar(sql.MAX), review_text)
+      .input(
+        "interview_questions",
+        sql.VarChar(sql.MAX),
+        interview_questions || ""
+      )
+      .input(
+        "preparation_tips",
+        sql.VarChar(sql.MAX),
+        preparation_tips || ""
+      )
+      .input("is_genuine", sql.VarChar(50), is_genuine)
       .query(`
         INSERT INTO reviews
         (
           alumni_id,
           internship_id,
-          rating,
-          learning_quality,
-          work_pressure,
-          certificate_value,
-          stipend_reality,
-          comments
+          company_name,
+          role,
+          review_text,
+          interview_questions,
+          preparation_tips,
+          is_genuine
         )
-
         VALUES
         (
           @alumni_id,
           @internship_id,
-          @rating,
-          @learning_quality,
-          @work_pressure,
-          @certificate_value,
-          @stipend_reality,
-          @comments
+          @company_name,
+          @role,
+          @review_text,
+          @interview_questions,
+          @preparation_tips,
+          @is_genuine
         )
       `);
 
@@ -59,6 +62,8 @@ exports.addReview = async (req, res) => {
       message: "Review added successfully",
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: "Failed to add review",
       error: error.message,
@@ -66,7 +71,6 @@ exports.addReview = async (req, res) => {
   }
 };
 
-// GET REVIEWS BY INTERNSHIP
 exports.getReviewsByInternship = async (req, res) => {
   try {
     const { internship_id } = req.params;
@@ -76,24 +80,19 @@ exports.getReviewsByInternship = async (req, res) => {
     const result = await pool
       .request()
       .input("internship_id", sql.Int, internship_id)
-
       .query(`
-        SELECT
-          r.*,
-          a.name AS alumni_name
-
+        SELECT r.*, a.name AS alumni_name
         FROM reviews r
-
         JOIN alumni a
         ON r.alumni_id = a.alumni_id
-
         WHERE r.internship_id = @internship_id
-
-        ORDER BY r.created_at DESC
+        ORDER BY r.review_id DESC
       `);
 
     res.status(200).json(result.recordset);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: "Failed to fetch reviews",
       error: error.message,
