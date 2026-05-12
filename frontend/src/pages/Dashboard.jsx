@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { getAllInternships } from "../services/internshipService";
+import { calculateMatch } from "../services/matchService";
+import { verifyExternalInternship } from "../services/verificationService";
+import { uploadResumeService } from "../services/profileService";
 
 import StatCard from "../components/StatCard";
 import MatchResult from "../components/MatchResult";
@@ -31,7 +34,7 @@ function Dashboard() {
   useEffect(() => {
     const loadInternships = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/internships/all");
+        const res = await getAllInternships();
         setInternships(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.log(error);
@@ -51,10 +54,7 @@ function Dashboard() {
     formData.append("resume", resume);
 
     try {
-      const res = await axios.post(
-        `http://localhost:5000/api/profile/resume/${student?.student_id || 1}`,
-        formData
-      );
+      const res = await uploadResumeService(student?.student_id || 1, formData);
 
       alert(
         `${res.data.message}\nExtracted Skills: ${res.data.extracted_skills?.join(", ")}`
@@ -83,9 +83,7 @@ function Dashboard() {
 
   const checkMatch = async (internshipId) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/match/${student?.student_id || 1}/${internshipId}`
-      );
+      const res = await calculateMatch(student?.student_id || 1, internshipId);
 
       setMatchResult(res.data);
 
@@ -100,10 +98,10 @@ function Dashboard() {
 
   const verifyExternal = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/verify/external", {
-        student_id: student?.student_id || 1,
-        ...urlData,
-      });
+      const res = await verifyExternalInternship({
+  student_id: student?.student_id || 1,
+  ...urlData,
+});
 
       alert(
         `Status: ${res.data.verification_status}\nScore: ${
